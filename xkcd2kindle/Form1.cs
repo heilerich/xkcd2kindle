@@ -42,17 +42,26 @@ namespace xkcd2kindle
 
         private comic getComic(int num)
         {
-            string url = "http://xkcd.com/" + num.ToString() + "/info.0.json";
+            comic cm;
+            try
+            {
+                string url = "http://xkcd.com/" + num.ToString() + "/info.0.json";
 
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            WebResponse wb = req.GetResponse();
-            Stream str = wb.GetResponseStream();
-            StreamReader rdr = new StreamReader(str);
-            string resstr = rdr.ReadToEnd();
-            rdr.Close();
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                WebResponse wb = req.GetResponse();
+                Stream str = wb.GetResponseStream();
+                StreamReader rdr = new StreamReader(str);
+                string resstr = rdr.ReadToEnd();
+                rdr.Close();
 
-            JavaScriptSerializer sr = new JavaScriptSerializer();
-            comic cm = sr.Deserialize<comic>(resstr);
+                JavaScriptSerializer sr = new JavaScriptSerializer();
+                cm = sr.Deserialize<comic>(resstr);
+            }
+            catch (Exception e)
+            {
+                cm = new comic();
+                cm.num = num;
+            }
             return cm;
         }
 
@@ -64,7 +73,6 @@ namespace xkcd2kindle
             StreamReader rdr = new StreamReader(str);
             string resstr = rdr.ReadToEnd();
             rdr.Close();
-
             JavaScriptSerializer sr = new JavaScriptSerializer();
             comic cm = sr.Deserialize<comic>(resstr);
             return cm;
@@ -122,13 +130,16 @@ namespace xkcd2kindle
             {
                 com = getComic(com.num-1);
             }
-            pictureBox1.Load(com.img);
-            Bitmap bmp = new Bitmap(600,800);
-            Graphics.FromImage(bmp).Clear(Color.White);
-            pictureBox1.DrawToBitmap(bmp, new Rectangle(0, 0, 600, 700));
-            addtext(ref bmp, com.safe_title + ": " + com.alt);
-            pictureBox2.Image = bmp;
-            bmp.Save(com.num + ".png", System.Drawing.Imaging.ImageFormat.Png);
+            if (com.img != null)
+            {
+                pictureBox1.Load(com.img);
+                Bitmap bmp = new Bitmap(600, 800);
+                Graphics.FromImage(bmp).Clear(Color.White);
+                pictureBox1.DrawToBitmap(bmp, new Rectangle(0, 0, 600, 700));
+                addtext(ref bmp, com.safe_title + ": " + com.alt);
+                pictureBox2.Image = bmp;
+                bmp.Save(com.num + ".png", System.Drawing.Imaging.ImageFormat.Png);
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
